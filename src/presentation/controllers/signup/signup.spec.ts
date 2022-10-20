@@ -152,6 +152,8 @@ describe('SignUp Controller', () => {
 
   test('Should return 500 if EmailValidor throws', async () => {
     const { sut, emailValidatorStub } = makeSut()
+    const fakeError = new Error()
+    fakeError.stack = 'any_stack'
     jest.spyOn(emailValidatorStub, 'isValid').mockImplementationOnce(() => {
       throw new Error()
     }) // Mockando returno do metodo isValid
@@ -165,11 +167,13 @@ describe('SignUp Controller', () => {
     }
     const httpResponse = await sut.handle(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body).toEqual(new ServerError())
+    expect(httpResponse.body).toEqual(new ServerError(fakeError.stack))
   })
 
   test('Should return 500 if AddAccount throws', async () => {
     const { sut, addAccountStub } = makeSut()
+    const fakeError = new Error()
+    fakeError.stack = 'any_stack'
     jest.spyOn(addAccountStub, 'add').mockImplementationOnce(async () => {
       return new Promise((resolve, reject) => reject(new Error()))
     }) // Mockando returno do metodo add
@@ -183,7 +187,7 @@ describe('SignUp Controller', () => {
     }
     const httpResponse = await sut.handle(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body).toEqual(new ServerError())
+    expect(httpResponse.body).toEqual(new ServerError(fakeError.stack))
   })
 
   test('Should call AddAccount with correct values', async () => {
