@@ -1,6 +1,6 @@
 import { SignUpController } from './signup'
-import { InvalidParamError, MissingParamError, ServerError } from '../../errors'
-import { EmailValidator, HttpRequest } from './signup-protocols'
+import { InvalidParamError, MissingParamError } from '../../errors'
+import { EmailValidator, HttpRequest, HttpResponse } from './signup-protocols'
 import { AddAccount, AddAccountModel } from '../../../domain/usecases/add-account'
 import { AccountModel } from '../../../domain/models/account'
 import { success, serverError, badRequest } from '../../helpers/http-helper'
@@ -40,8 +40,10 @@ const makeFakeRequest = (): HttpRequest => ({
     passwordConfirmation: 'any_password'
   }
 })
-const makeFakeErrorStack = (): string => {
-  return 'any_error_stack'
+const makeFakeServerError = (): HttpResponse => {
+  const fakeError = new Error()
+  fakeError.stack = 'any_stack'
+  return serverError(fakeError)
 }
 interface SutTypes {
   sut: SignUpController
@@ -148,7 +150,7 @@ describe('SignUp Controller', () => {
       throw new Error()
     }) // Mockando returno do metodo isValid
     const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(serverError(new ServerError(makeFakeErrorStack())))
+    expect(httpResponse).toEqual(makeFakeServerError())
   })
 
   test('Should return 500 if AddAccount throws', async () => {
@@ -165,7 +167,7 @@ describe('SignUp Controller', () => {
       }
     }
     const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(serverError(new ServerError(makeFakeErrorStack())))
+    expect(httpResponse).toEqual(makeFakeServerError())
   })
 
   test('Should call AddAccount with correct values', async () => {
