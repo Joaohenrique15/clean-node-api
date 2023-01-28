@@ -1,6 +1,7 @@
 import { ValidationComposite } from './validation-composite'
 import { MissingParamError } from '../../errors'
 import { Validation } from './validation'
+import { RequiredFieldValidation } from './required-field-validation'
 
 const makeValidation = (): Validation => {
   class ValidationStub implements Validation {
@@ -42,5 +43,11 @@ describe('Validation Composite', () => {
     jest.spyOn(validationStubs[1], 'validate').mockReturnValueOnce(new MissingParamError('field'))
     const error = sut.validate({ field: 'any_value' })
     expect(error).toEqual(new Error())
+  })
+
+  test('Should not return if validation succeeds', () => {
+    const sut = new RequiredFieldValidation('field')
+    const error = sut.validate({ field: 'any_name' })
+    expect(error).toBeFalsy()
   })
 })
